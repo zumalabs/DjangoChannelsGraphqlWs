@@ -46,7 +46,6 @@ import threading
 import time
 import traceback
 import weakref
-from collections.abc import Sequence
 from typing import (
     Any,
     AsyncIterator,
@@ -57,6 +56,9 @@ from typing import (
     Type,
     Union,
     cast,
+    List,
+    Tuple,
+    Sequence,
 )
 
 import asgiref.sync
@@ -200,7 +202,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
         # Subscription identifier - protocol operation identifier.
         sid: int
         # Subscription groups the subscription belongs to.
-        groups: list[str]
+        groups: List[str]
         # A function which triggets subscription.
         enqueue_notification: Callable[[Any], None]
         # The callback to invoke when client unsubscribes.
@@ -222,7 +224,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
 
         @staticmethod
         def build_response(
-            data: Optional[Dict[str, Any]], errors: list[graphql.GraphQLError]
+            data: Optional[Dict[str, Any]], errors: List[graphql.GraphQLError]
         ) -> graphql.ExecutionResult:
             """Remove skipped subscription events from results.
 
@@ -241,7 +243,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
         def complete_value(
             self,
             return_type: graphql.GraphQLOutputType,
-            field_nodes: list[graphql.FieldNode],
+            field_nodes: List[graphql.FieldNode],
             info: graphql.GraphQLResolveInfo,
             path: graphql.pyutils.Path,
             result: Any,
@@ -332,7 +334,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
             LOG.warning("WebSocket connection closed with code: %s!", code)
 
         # The list of awaitables to simultaneously wait at the end.
-        waitlist: list[asyncio.Task] = []
+        waitlist: List[asyncio.Task] = []
 
         # Unsubscribe from the Channels groups.
         waitlist += [
@@ -778,7 +780,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
 
     async def _on_gql_start__parse_query(
         self, op_name: str, query: str
-    ) -> tuple[
+    ) -> Tuple[
         Optional[graphql.DocumentNode],
         Optional[graphql.OperationDefinitionNode],
         Optional[Sequence[graphql.GraphQLError]],
@@ -816,7 +818,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
     @functools.lru_cache(maxsize=128)
     def _on_gql_start__parse_query_sync_cached(
         self, op_name: str, query: str
-    ) -> tuple[
+    ) -> Tuple[
         Optional[graphql.DocumentNode],
         Optional[graphql.OperationDefinitionNode],
         Optional[Sequence[graphql.GraphQLError]],
@@ -834,7 +836,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
             return None, None, [ex]
 
         # Validation.
-        validation_errors: list[graphql.GraphQLError] = graphql.validate(
+        validation_errors: List[graphql.GraphQLError] = graphql.validate(
             self.schema.graphql_schema, doc_ast
         )
         if validation_errors:
@@ -1188,7 +1190,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
         if op_id not in self._subscriptions:
             return
 
-        waitlist: list[asyncio.Task] = []
+        waitlist: List[asyncio.Task] = []
 
         # Remove the subscription from the registry.
         subinf = self._subscriptions.pop(op_id)
