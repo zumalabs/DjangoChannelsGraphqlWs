@@ -591,8 +591,7 @@ class GraphqlWsConsumer(ch_websocket.AsyncJsonWebsocketConsumer):
 
             # Prepare a context object.
             context = DictAsObject({})
-            if self.scope.get("user") is not None:
-                context.user = self.scope.user
+            context.user = self.scope.get("user")
             context.channels_scope = self.scope
             context.channel_name = self.channel_name
 
